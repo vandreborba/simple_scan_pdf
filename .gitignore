@@ -43,3 +43,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Assinatura do app (NUNCA versionar — perder a chave = não conseguir atualizar o app)
+*.jks
+*.keystore
+key.properties
+/android/key.properties

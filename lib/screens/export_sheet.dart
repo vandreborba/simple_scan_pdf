@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/enum_labels.dart';
 import '../models/scan_models.dart';
 import '../services/ocr_service.dart';
 import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../session.dart';
-import 'ocr_text_screen.dart';
 
 /// Abre a folha de exportação: nome do arquivo, qualidade e OCR,
 /// tudo já preenchido com os padrões do usuário.
@@ -57,9 +58,11 @@ class _ExportSheetState extends State<_ExportSheet> {
   }
 
   Future<void> _export() async {
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     setState(() {
       _working = true;
-      _status = 'Preparando…';
+      _status = l.preparing;
     });
 
     try {
@@ -68,14 +71,13 @@ class _ExportSheetState extends State<_ExportSheet> {
 
       if (_ocr) {
         for (var i = 0; i < pages.length; i++) {
-          setState(
-              () => _status = 'OCR da página ${i + 1} de ${pages.length}…');
+          setState(() => _status = l.ocrProgress(i + 1, pages.length));
           final path = pages[i].processedPath ?? pages[i].originalPath;
           ocrResults[i] = await OcrService.recognizeFile(path);
         }
       }
 
-      setState(() => _status = 'Gerando PDF…');
+      setState(() => _status = l.generatingPdf);
       final dir = await getApplicationDocumentsDirectory();
       final name = _nameController.text.trim().isEmpty
           ? widget.settings.defaultFileName()
@@ -89,82 +91,28 @@ class _ExportSheetState extends State<_ExportSheet> {
       );
 
       if (!mounted) return;
+      // Fecha a folha de opções e abre o compartilhamento do sistema direto,
+      // sem folha intermediária.
       Navigator.of(context).pop();
-      await _showResult(file.path, safeName, ocrResults);
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)]),
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
           _working = false;
           _status = '';
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao exportar: $e')),
+        messenger.showSnackBar(
+          SnackBar(content: Text(l.exportError('$e'))),
         );
       }
     }
   }
 
-  Future<void> _showResult(
-    String pdfPath,
-    String name,
-    Map<int, OcrPageResult> ocrResults,
-  ) async {
-    final fullText = ocrResults.entries
-        .map((e) => e.value.fullText.trim())
-        .where((t) => t.isNotEmpty)
-        .join('\n\n');
-
-    final navigator = Navigator.of(context, rootNavigator: true);
-    await showModalBottomSheet(
-      context: navigator.context,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.green),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'PDF gerado: $name.pdf',
-                      style: Theme.of(sheetContext).textTheme.titleMedium,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                icon: const Icon(Icons.share),
-                label: const Text('Compartilhar'),
-                onPressed: () => SharePlus.instance.share(
-                  ShareParams(files: [XFile(pdfPath)]),
-                ),
-              ),
-              if (fullText.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.text_snippet_outlined),
-                  label: const Text('Ver texto reconhecido (OCR)'),
-                  onPressed: () => Navigator.of(sheetContext).push(
-                    MaterialPageRoute(
-                      builder: (_) => OcrTextScreen(text: fullText),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(
         left: 24,
@@ -177,29 +125,29 @@ class _ExportSheetState extends State<_ExportSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Exportar PDF',
+            l.exportPdf,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _nameController,
             enabled: !_working,
-            decoration: const InputDecoration(
-              labelText: 'Nome do arquivo',
+            decoration: InputDecoration(
+              labelText: l.fileName,
               suffixText: '.pdf',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<PdfQuality>(
             initialValue: _quality,
-            decoration: const InputDecoration(
-              labelText: 'Qualidade',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l.quality,
+              border: const OutlineInputBorder(),
             ),
             items: [
               for (final q in PdfQuality.values)
-                DropdownMenuItem(value: q, child: Text(q.label)),
+                DropdownMenuItem(value: q, child: Text(q.label(l))),
             ],
             onChanged: _working
                 ? null
@@ -207,8 +155,8 @@ class _ExportSheetState extends State<_ExportSheet> {
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('OCR (texto pesquisável)'),
-            subtitle: const Text('Reconhecimento local, no aparelho'),
+            title: Text(l.ocrSwitchTitle),
+            subtitle: Text(l.ocrSwitchSubtitle),
             value: _ocr,
             onChanged: _working ? null : (v) => setState(() => _ocr = v),
           ),
@@ -221,9 +169,10 @@ class _ExportSheetState extends State<_ExportSheet> {
           ] else
             FilledButton.icon(
               icon: const Icon(Icons.picture_as_pdf),
-              label: const Text('Gerar PDF'),
+              label: Text(l.generatePdf),
               onPressed: _export,
             ),
+          const SizedBox(height: 32),
         ],
       ),
     );

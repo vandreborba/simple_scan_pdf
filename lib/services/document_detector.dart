@@ -3,11 +3,33 @@ import 'dart:ui' show Offset;
 
 import 'package:dartcv4/dartcv.dart' as cv;
 
+import '../models/scan_models.dart';
+
+/// Parâmetros de detecção derivados da [DetectionSensitivity].
+class _DetectionParams {
+  const _DetectionParams(this.minAreaFraction, this.cannyThresholds);
+
+  /// Fração mínima da área da imagem que o documento precisa ocupar.
+  final double minAreaFraction;
+
+  /// Pares de limiares (baixo, alto) do Canny a experimentar, em ordem.
+  final List<(double, double)> cannyThresholds;
+}
+
 /// Detecta o contorno de um documento (papel) em uma imagem.
 ///
 /// Os cantos são retornados normalizados (0..1) na ordem TL, TR, BR, BL.
 class DocumentDetector {
   static const _maxAnalysisSide = 1000;
+
+  static _DetectionParams _paramsFor(DetectionSensitivity s) => switch (s) {
+        DetectionSensitivity.conservative =>
+          const _DetectionParams(0.30, [(75.0, 200.0), (50.0, 150.0)]),
+        DetectionSensitivity.balanced => const _DetectionParams(
+            0.15, [(50.0, 150.0), (30.0, 90.0), (75.0, 200.0)]),
+        DetectionSensitivity.sensitive => const _DetectionParams(
+            0.08, [(20.0, 60.0), (30.0, 90.0), (50.0, 150.0), (75.0, 200.0)]),
+      };
 
   /// Cantos padrão: imagem inteira com pequena margem.
   static List<Offset> fullImageCorners() => const [
@@ -19,19 +41,26 @@ class DocumentDetector {
 
   /// Detecta os cantos do documento no arquivo de imagem [path].
   /// Retorna a imagem inteira quando nenhum documento é encontrado.
-  static Future<List<Offset>> detectFromFile(String path) async {
+  static Future<List<Offset>> detectFromFile(
+    String path, {
+    DetectionSensitivity sensitivity = DetectionSensitivity.balanced,
+  }) async {
     // imread aplica a orientação EXIF, ao contrário de imdecode.
     final src = await cv.imreadAsync(path, flags: cv.IMREAD_GRAYSCALE);
     try {
       if (src.isEmpty) return fullImageCorners();
-      return await detectFromGray(src) ?? fullImageCorners();
+      return await detectFromGray(src, sensitivity: sensitivity) ??
+          fullImageCorners();
     } finally {
       src.dispose();
     }
   }
 
   /// Detecta o documento em um [gray] (CV_8UC1). Retorna null se não achar.
-  static Future<List<Offset>?> detectFromGray(cv.Mat gray) async {
+  static Future<List<Offset>?> detectFromGray(
+    cv.Mat gray, {
+    DetectionSensitivity sensitivity = DetectionSensitivity.balanced,
+  }) async {
     final w = gray.cols;
     final h = gray.rows;
 
@@ -50,7 +79,8 @@ class DocumentDetector {
 
     try {
       final blurred = await cv.gaussianBlurAsync(small, (5, 5), 0);
-      final quad = await _findBestQuad(blurred, small.cols, small.rows);
+      final quad =
+          await _findBestQuad(blurred, small.cols, small.rows, sensitivity);
       blurred.dispose();
       if (quad == null) return null;
 
@@ -70,12 +100,14 @@ class DocumentDetector {
     cv.Mat blurred,
     int width,
     int height,
+    DetectionSensitivity sensitivity,
   ) async {
+    final params = _paramsFor(sensitivity);
     final imageArea = (width * height).toDouble();
     List<cv.Point2f>? best;
-    var bestArea = imageArea * 0.15; // área mínima: 15% da imagem
+    var bestArea = imageArea * params.minAreaFraction;
 
-    for (final (t1, t2) in const [(50.0, 150.0), (30.0, 90.0), (75.0, 200.0)]) {
+    for (final (t1, t2) in params.cannyThresholds) {
       final edges = await cv.cannyAsync(blurred, t1, t2);
       // Fecha pequenas falhas nas bordas do papel.
       final kernel = cv.getStructuringElement(cv.MORPH_RECT, (5, 5));

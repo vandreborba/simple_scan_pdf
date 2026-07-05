@@ -3,12 +3,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/scan_models.dart';
 import '../services/document_detector.dart';
 import '../widgets/corner_editor.dart';
 
-/// Ajuste do recorte: mostra a detecção automática e permite arrastar
-/// os quatro cantos. Retorna true (pop) quando o usuário confirma.
+/// Ajuste do recorte: mostra a detecção automática, permite arrastar os
+/// quatro cantos e girar a página. Retorna true (pop) ao confirmar.
 class CropScreen extends StatefulWidget {
   const CropScreen({super.key, required this.page});
 
@@ -21,6 +22,8 @@ class CropScreen extends StatefulWidget {
 class _CropScreenState extends State<CropScreen> {
   double? _aspectRatio;
   bool _detecting = false;
+
+  int get _turns => widget.page.quarterTurns % 4;
 
   @override
   void initState() {
@@ -49,32 +52,81 @@ class _CropScreenState extends State<CropScreen> {
     }
   }
 
+  void _rotate() {
+    setState(() =>
+        widget.page.quarterTurns = (widget.page.quarterTurns + 1) % 4);
+  }
+
+  // Converte um ponto do espaço da imagem original para o espaço exibido
+  // (imagem girada [_turns] quartos de volta no sentido horário).
+  Offset _toDisplay(Offset p) {
+    switch (_turns) {
+      case 1:
+        return Offset(1 - p.dy, p.dx);
+      case 2:
+        return Offset(1 - p.dx, 1 - p.dy);
+      case 3:
+        return Offset(p.dy, 1 - p.dx);
+      default:
+        return p;
+    }
+  }
+
+  // Inverso de [_toDisplay]: do espaço exibido de volta para o original.
+  Offset _toOriginal(Offset p) {
+    switch (_turns) {
+      case 1:
+        return Offset(p.dy, 1 - p.dx);
+      case 2:
+        return Offset(1 - p.dx, 1 - p.dy);
+      case 3:
+        return Offset(1 - p.dy, p.dx);
+      default:
+        return p;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final baseAspect = _aspectRatio;
+    final displayAspect = baseAspect == null
+        ? null
+        : (_turns.isOdd ? 1 / baseAspect : baseAspect);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Ajustar recorte'),
+        title: Text(l.adjustCrop),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.rotate_90_degrees_cw_outlined),
+            tooltip: l.rotate,
+            onPressed: _rotate,
+          ),
+        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: Center(
-              child: _aspectRatio == null
+              child: displayAspect == null
                   ? const CircularProgressIndicator()
                   : Padding(
                       padding: const EdgeInsets.all(16),
                       child: AspectRatio(
-                        aspectRatio: _aspectRatio!,
+                        aspectRatio: displayAspect,
                         child: CornerEditor(
-                          corners: widget.page.corners,
-                          onChanged: (corners) =>
-                              setState(() => widget.page.corners = corners),
-                          child: Image.file(
-                            File(widget.page.originalPath),
-                            fit: BoxFit.fill,
+                          corners: widget.page.corners.map(_toDisplay).toList(),
+                          onChanged: (corners) => setState(() => widget
+                              .page.corners = corners.map(_toOriginal).toList()),
+                          child: RotatedBox(
+                            quarterTurns: _turns,
+                            child: Image.file(
+                              File(widget.page.originalPath),
+                              fit: BoxFit.fill,
+                            ),
                           ),
                         ),
                       ),
@@ -91,28 +143,29 @@ class _CropScreenState extends State<CropScreen> {
                   onPressed: _detecting ? null : _redetect,
                   icon: const Icon(Icons.center_focus_strong,
                       color: Colors.white),
-                  label: const Text(
-                    'Detectar',
-                    style: TextStyle(color: Colors.white),
+                  label: Text(
+                    l.detect,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 TextButton.icon(
                   onPressed: () => setState(() => widget.page.corners =
                       DocumentDetector.fullImageCorners()),
                   icon: const Icon(Icons.fullscreen, color: Colors.white),
-                  label: const Text(
-                    'Tudo',
-                    style: TextStyle(color: Colors.white),
+                  label: Text(
+                    l.all,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 FilledButton.icon(
                   onPressed: () => Navigator.of(context).pop(true),
                   icon: const Icon(Icons.check),
-                  label: const Text('Usar'),
+                  label: Text(l.use),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );

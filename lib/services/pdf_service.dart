@@ -5,14 +5,14 @@ import 'package:pdf/pdf.dart';
 
 import '../models/scan_models.dart';
 
-/// Qualidade de exportação do PDF (largura máxima da página em pontos).
+/// Qualidade de exportação do PDF (largura da página em pontos).
+/// Os rótulos ficam em [PdfQualityL10n].
 enum PdfQuality {
-  economy('Econômico', 420),
-  balanced('Equilibrado', 595),
-  high('Alta', 842);
+  economy(420),
+  balanced(595),
+  high(842);
 
-  const PdfQuality(this.label, this.pageWidth);
-  final String label;
+  const PdfQuality(this.pageWidth);
   final double pageWidth;
 }
 

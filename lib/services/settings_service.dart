@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/scan_models.dart';
@@ -16,14 +17,51 @@ class AppSettings {
   bool get autoDetect => _prefs.getBool('autoDetect') ?? true;
   set autoDetect(bool v) => _prefs.setBool('autoDetect', v);
 
+  /// Sensibilidade da detecção automática de bordas.
+  DetectionSensitivity get detectionSensitivity {
+    final name = _prefs.getString('detectionSensitivity');
+    return DetectionSensitivity.values.firstWhere(
+      (s) => s.name == name,
+      orElse: () => DetectionSensitivity.balanced,
+    );
+  }
+
+  set detectionSensitivity(DetectionSensitivity s) =>
+      _prefs.setString('detectionSensitivity', s.name);
+
+  /// Se true, dispara a foto sozinho quando o documento fica estável no
+  /// preview. Depende da detecção automática estar ligada.
+  bool get autoCapture => _prefs.getBool('autoCapture') ?? true;
+  set autoCapture(bool v) => _prefs.setBool('autoCapture', v);
+
   bool get ocrEnabled => _prefs.getBool('ocrEnabled') ?? true;
   set ocrEnabled(bool v) => _prefs.setBool('ocrEnabled', v);
+
+  /// Se true (padrão), ao confirmar uma página vai direto para a revisão do
+  /// documento. Se false, continua na câmera para capturar várias em sequência.
+  bool get reviewAfterEachPage => _prefs.getBool('reviewAfterEachPage') ?? true;
+  set reviewAfterEachPage(bool v) => _prefs.setBool('reviewAfterEachPage', v);
+
+  /// Locale escolhido pelo usuário, ou null para seguir o sistema.
+  Locale? get locale {
+    final code = _prefs.getString('locale');
+    if (code == null || code.isEmpty) return null;
+    return Locale(code);
+  }
+
+  set locale(Locale? value) {
+    if (value == null) {
+      _prefs.remove('locale');
+    } else {
+      _prefs.setString('locale', value.languageCode);
+    }
+  }
 
   ScanFilter get defaultFilter {
     final name = _prefs.getString('defaultFilter');
     return ScanFilter.values.firstWhere(
       (f) => f.name == name,
-      orElse: () => ScanFilter.document,
+      orElse: () => ScanFilter.original,
     );
   }
 

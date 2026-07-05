@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/enum_labels.dart';
 import '../models/scan_models.dart';
 import '../services/image_processor.dart';
 import '../session.dart';
@@ -28,6 +30,7 @@ class _PageEditScreenState extends State<PageEditScreen> {
   ScanPage get page => widget.session.pages[widget.pageIndex];
 
   Future<void> _reprocess() async {
+    final l = AppLocalizations.of(context);
     setState(() => _processing = true);
     try {
       final oldPath = page.processedPath;
@@ -41,7 +44,7 @@ class _PageEditScreenState extends State<PageEditScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao processar: $e')),
+          SnackBar(content: Text(l.processError('$e'))),
         );
       }
     } finally {
@@ -71,19 +74,20 @@ class _PageEditScreenState extends State<PageEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final path = page.processedPath ?? page.originalPath;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Página ${widget.pageIndex + 1}'),
+        title: Text(l.pageNumber(widget.pageIndex + 1)),
         actions: [
           IconButton(
             icon: const Icon(Icons.crop),
-            tooltip: 'Ajustar recorte',
+            tooltip: l.adjustCrop,
             onPressed: _processing ? null : _recrop,
           ),
           IconButton(
             icon: const Icon(Icons.rotate_90_degrees_cw_outlined),
-            tooltip: 'Girar',
+            tooltip: l.rotate,
             onPressed: _processing ? null : _rotate,
           ),
         ],
@@ -104,6 +108,7 @@ class _PageEditScreenState extends State<PageEditScreen> {
             ),
           ),
           SafeArea(
+            top: false,
             child: SizedBox(
               height: 64,
               child: ListView(
@@ -117,7 +122,7 @@ class _PageEditScreenState extends State<PageEditScreen> {
                         vertical: 12,
                       ),
                       child: ChoiceChip(
-                        label: Text(filter.label),
+                        label: Text(filter.label(l)),
                         selected: page.filter == filter,
                         onSelected: _processing
                             ? null
@@ -128,6 +133,7 @@ class _PageEditScreenState extends State<PageEditScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'dart:ui' show Offset;
 import 'package:camera/camera.dart';
 import 'package:dartcv4/dartcv.dart' as cv;
 
+import '../models/scan_models.dart';
 import 'document_detector.dart';
 
 /// Roda a detecção de documento sobre frames da câmera (plano Y do YUV),
@@ -12,9 +13,15 @@ class LiveDetector {
   bool _busy = false;
   DateTime _lastRun = DateTime.fromMillisecondsSinceEpoch(0);
 
-  /// Cantos normalizados no espaço do frame (antes da rotação do sensor),
-  /// ou null quando nada foi detectado.
-  Future<List<Offset>?> analyze(CameraImage image, int sensorOrientation) async {
+  /// Analisa um frame da câmera. O retorno tem três significados:
+  /// - lista com 4 cantos: documento encontrado (já no espaço do preview);
+  /// - lista vazia: analisou e não achou documento (limpa o overlay);
+  /// - null: frame descartado (throttle/ocupado) — mantenha o estado atual.
+  Future<List<Offset>?> analyze(
+    CameraImage image,
+    int sensorOrientation, {
+    DetectionSensitivity sensitivity = DetectionSensitivity.balanced,
+  }) async {
     if (_busy) return null;
     final now = DateTime.now();
     if (now.difference(_lastRun).inMilliseconds < 250) return null;
@@ -25,8 +32,12 @@ class LiveDetector {
       final gray = _grayFromYuv(image);
       if (gray == null) return null;
       try {
-        final corners = await DocumentDetector.detectFromGray(gray);
-        if (corners == null) return null;
+        final corners = await DocumentDetector.detectFromGray(
+          gray,
+          sensitivity: sensitivity,
+        );
+        // Analisou mas não achou: lista vazia (diferente de frame descartado).
+        if (corners == null) return const <Offset>[];
         return corners
             .map((c) => _rotateToPreview(c, sensorOrientation))
             .toList();

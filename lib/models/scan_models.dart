@@ -1,15 +1,20 @@
 import 'dart:ui';
 
-/// Filtros disponíveis por página.
+/// Filtros disponíveis por página. Os rótulos ficam em [ScanFilterL10n].
 enum ScanFilter {
-  original('Original'),
-  document('Documento'),
-  grayscale('Cinza'),
-  blackWhite('P&B'),
-  highContrast('Contraste');
+  original,
+  document,
+  grayscale,
+  blackWhite,
+  highContrast,
+}
 
-  const ScanFilter(this.label);
-  final String label;
+/// Sensibilidade da detecção automática de bordas. Os rótulos ficam em
+/// [DetectionSensitivityL10n].
+enum DetectionSensitivity {
+  conservative,
+  balanced,
+  sensitive,
 }
 
 /// Uma página capturada dentro do documento em andamento.
@@ -17,7 +22,7 @@ class ScanPage {
   ScanPage({
     required this.originalPath,
     required this.corners,
-    this.filter = ScanFilter.document,
+    this.filter = ScanFilter.original,
     this.quarterTurns = 0,
   });
 

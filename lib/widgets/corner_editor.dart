@@ -63,6 +63,7 @@ class _CornerEditorState extends State<CornerEditor> {
             widget.onChanged(updated);
           },
           onPanEnd: (_) => setState(() => _dragIndex = null),
+          onPanCancel: () => setState(() => _dragIndex = null),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -75,12 +76,86 @@ class _CornerEditorState extends State<CornerEditor> {
                   handleRadius: _handleRadius,
                 ),
               ),
+              if (_dragIndex != null) _buildMagnifier(size, _dragIndex!),
             ],
           ),
         );
       },
     );
   }
+
+  /// Lupa flutuante que amplia a região em volta do canto sendo arrastado.
+  /// Usa [RawMagnifier], que amplia os pixels já renderizados (imagem +
+  /// linhas), então não precisa refazer a matemática de rotação/escala.
+  Widget _buildMagnifier(Size size, int index) {
+    const loupeSize = 120.0;
+    const loupeRadius = loupeSize / 2;
+    const gap = 20.0;
+    final color = Theme.of(context).colorScheme.primary;
+
+    final focal = Offset(
+      widget.corners[index].dx * size.width,
+      widget.corners[index].dy * size.height,
+    );
+
+    // A lupa flutua acima do ponto; se não couber em cima, vai para baixo.
+    var centerY = focal.dy - gap - loupeRadius;
+    if (centerY - loupeRadius < 0) {
+      centerY = focal.dy + gap + loupeRadius;
+    }
+    final maxX = size.width - loupeRadius;
+    final maxY = size.height - loupeRadius;
+    final center = Offset(
+      maxX > loupeRadius ? focal.dx.clamp(loupeRadius, maxX) : size.width / 2,
+      maxY > loupeRadius ? centerY.clamp(loupeRadius, maxY) : size.height / 2,
+    );
+
+    return Positioned(
+      left: center.dx - loupeRadius,
+      top: center.dy - loupeRadius,
+      child: IgnorePointer(
+        child: RawMagnifier(
+          size: const Size(loupeSize, loupeSize),
+          magnificationScale: 2,
+          // O ponto observado, relativo ao centro da lupa (ver _RenderMagnification).
+          focalPointOffset: focal - center,
+          decoration: const MagnifierDecoration(
+            shape: CircleBorder(
+              side: BorderSide(color: Colors.white, width: 2.5),
+            ),
+            shadows: [
+              BoxShadow(color: Colors.black45, blurRadius: 10, spreadRadius: 1),
+            ],
+          ),
+          child: CustomPaint(painter: _CrosshairPainter(color)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Mira desenhada sobre o conteúdo ampliado, marcando o ponto exato.
+class _CrosshairPainter extends CustomPainter {
+  _CrosshairPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    const r = 12.0;
+    final line = Paint()
+      ..color = color.withValues(alpha: 0.9)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(c.dx - r, c.dy), Offset(c.dx + r, c.dy), line);
+    canvas.drawLine(Offset(c.dx, c.dy - r), Offset(c.dx, c.dy + r), line);
+    canvas.drawCircle(c, 3, line);
+  }
+
+  @override
+  bool shouldRepaint(_CrosshairPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class _EditQuadPainter extends CustomPainter {
@@ -129,16 +204,29 @@ class _EditQuadPainter extends CustomPainter {
 
     for (var i = 0; i < 4; i++) {
       final active = i == activeIndex;
-      canvas.drawCircle(
-        pts[i],
-        active ? handleRadius * 1.4 : handleRadius,
-        Paint()..color = Colors.white,
-      );
-      canvas.drawCircle(
-        pts[i],
-        (active ? handleRadius * 1.4 : handleRadius) - 3,
-        Paint()..color = color,
-      );
+      if (active) {
+        // Anel vazado: deixa o ponto exato à mostra (inclusive dentro da lupa).
+        final r = handleRadius * 1.5;
+        canvas.drawCircle(
+          pts[i],
+          r,
+          Paint()
+            ..color = Colors.white
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 4,
+        );
+        canvas.drawCircle(
+          pts[i],
+          r,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
+        );
+      } else {
+        canvas.drawCircle(pts[i], handleRadius, Paint()..color = Colors.white);
+        canvas.drawCircle(pts[i], handleRadius - 3, Paint()..color = color);
+      }
     }
   }
 

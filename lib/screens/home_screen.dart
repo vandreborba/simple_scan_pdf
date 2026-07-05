@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+import '../models/scan_models.dart';
+import '../services/document_channel.dart';
+import '../services/document_detector.dart';
+import '../services/image_processor.dart';
 import '../services/settings_service.dart';
 import '../session.dart';
 import 'camera_screen.dart';
+import 'crop_screen.dart';
 import 'review_screen.dart';
 import 'settings_screen.dart';
 
@@ -15,13 +21,14 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Simple Scan PDF'),
+        title: Text(l.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Configurações',
+            tooltip: l.settings,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => SettingsScreen(settings: settings),
@@ -43,13 +50,13 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Escaneie documentos e gere PDFs\ncom texto pesquisável',
+                l.homeTagline,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                'Tudo processado no seu aparelho.\nSem conta, sem nuvem, sem propaganda.',
+                l.homeSubtitle,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall,
               ),
@@ -62,19 +69,26 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.camera_alt_outlined),
-                label: const Text('Escanear'),
+                label: Text(l.scan),
                 onPressed: () => _startScan(context),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.onSurfaceVariant,
+                ),
+                icon: const Icon(Icons.add_photo_alternate_outlined, size: 20),
+                label: Text(l.addPhoto),
+                onPressed: () => _addPhoto(context),
+              ),
+              const SizedBox(height: 8),
               ListenableBuilder(
                 listenable: session,
                 builder: (context, _) {
                   if (session.isEmpty) return const SizedBox.shrink();
                   return TextButton.icon(
                     icon: const Icon(Icons.collections_outlined),
-                    label: Text(
-                      'Continuar documento (${session.pages.length} pág.)',
-                    ),
+                    label: Text(l.continueDocument(session.pages.length)),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => ReviewScreen(
@@ -86,6 +100,7 @@ class HomeScreen extends StatelessWidget {
                   );
                 },
               ),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -99,5 +114,51 @@ class HomeScreen extends StatelessWidget {
         builder: (_) => CameraScreen(session: session, settings: settings),
       ),
     );
+  }
+
+  /// Importa uma foto da galeria e a faz passar pelo mesmo fluxo da câmera:
+  /// detecção de bordas (se ligada) → recorte → processamento → revisão.
+  Future<void> _addPhoto(BuildContext context) async {
+    final l = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    String? path;
+    try {
+      path = await pickImageFromDevice();
+    } catch (_) {
+      path = null;
+    }
+    if (path == null) return; // usuário cancelou
+
+    final page = ScanPage(
+      originalPath: path,
+      corners: DocumentDetector.fullImageCorners(),
+      filter: settings.defaultFilter,
+    );
+    if (settings.autoDetect) {
+      page.corners = await DocumentDetector.detectFromFile(
+        path,
+        sensitivity: settings.detectionSensitivity,
+      );
+    }
+
+    final confirmed = await navigator.push<bool>(
+      MaterialPageRoute(builder: (_) => CropScreen(page: page)),
+    );
+    if (confirmed != true) return;
+
+    try {
+      page.processedPath = await ImageProcessor.process(page);
+      page.version++;
+      session.addPage(page);
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => ReviewScreen(session: session, settings: settings),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(l.processError('$e'))));
+    }
   }
 }

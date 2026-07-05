@@ -1,5 +1,5 @@
 name: simple_scan_pdf
-description: "A new Flutter project."
+description: "Scanner de documentos offline: câmera, recorte automático, filtros, OCR local e exportação em PDF pesquisável. Sem conta, sem nuvem, sem anúncios."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.2+3
 
 environment:
   sdk: ^3.11.5
@@ -37,11 +37,18 @@ dependencies:
   camera: ^0.12.0+1
   google_mlkit_text_recognition: ^0.15.1
   pdf: ^3.12.0
+  flutter_pdfview: ^1.4.4
   share_plus: ^13.2.0
   image: ^4.8.0
   path_provider: ^2.1.6
   shared_preferences: ^2.5.5
   dartcv4: ^2.2.1
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  url_launcher: ^6.3.2
+  archive: ^4.0.9
+  xml: ^6.6.1
 
 dev_dependencies:
   flutter_test:
@@ -53,6 +60,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -60,10 +68,22 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # Gera as classes de localização (AppLocalizations) a partir dos ARBs.
+  generate: true
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+# Ícone do app gerado a partir de assets/icon/app_icon.png.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#05A9A2"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
 
   # To add assets to your application, add an assets section, like this:
   # assets:

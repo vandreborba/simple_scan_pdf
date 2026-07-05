@@ -1,6 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/scan_models.dart';
 import '../services/document_detector.dart';
 import '../services/image_processor.dart';
@@ -33,6 +37,15 @@ class _CameraScreenState extends State<CameraScreen>
   bool _capturing = false;
   bool _flashOn = false;
   String? _error;
+
+  // Suavização (EMA) do contorno ao vivo: menor = mais suave e menos tremido.
+  static const _smoothingFactor = 0.35;
+  // Disparo automático: dispara quando o documento fica estável por alguns
+  // ciclos de análise (a detecção ao vivo roda ~a cada 250 ms).
+  static const _autoStableThreshold = 0.045; // movimento tolerado por canto (0..1)
+  static const _autoStableFrames = 4; // ciclos estáveis exigidos (~1 s)
+  List<Offset>? _prevCorners;
+  int _stableCount = 0;
 
   @override
   void initState() {
@@ -80,7 +93,9 @@ class _CameraScreenState extends State<CameraScreen>
       }
       _controller = controller;
 
-      if (widget.settings.autoDetect && controller.supportsImageStreaming()) {
+      final wantsStream =
+          widget.settings.autoDetect || widget.settings.autoCapture;
+      if (wantsStream && controller.supportsImageStreaming()) {
         await controller.startImageStream(_onFrame);
       }
       setState(() {});
@@ -94,19 +109,81 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _onFrame(CameraImage image) async {
     final controller = _controller;
     if (controller == null || _capturing) return;
-    final corners = await _liveDetector.analyze(
+    final result = await _liveDetector.analyze(
       image,
       controller.description.sensorOrientation,
+      sensitivity: widget.settings.detectionSensitivity,
     );
     if (!mounted || _capturing) return;
-    if (corners != null || _liveCorners != null) {
-      setState(() => _liveCorners = corners);
+
+    // null = frame descartado (throttle/ocupado): mantém o overlay como está,
+    // evitando o piscar. Lista vazia = analisou e não achou documento.
+    if (result == null) return;
+    final raw = result.isEmpty ? null : result;
+
+    final smoothed = _smoothCorners(raw);
+    if (smoothed != null || _liveCorners != null) {
+      setState(() => _liveCorners = smoothed);
     }
+    if (widget.settings.autoCapture) {
+      _evaluateAutoCapture(smoothed);
+    }
+  }
+
+  /// Suaviza o contorno com média exponencial (EMA) em relação ao anterior,
+  /// para o overlay deslizar em vez de pular a cada detecção.
+  List<Offset>? _smoothCorners(List<Offset>? target) {
+    if (target == null) return null;
+    final prev = _liveCorners;
+    if (prev == null || prev.length != target.length) return target;
+    return [
+      for (var i = 0; i < target.length; i++)
+        Offset.lerp(prev[i], target[i], _smoothingFactor)!,
+    ];
+  }
+
+  /// Acompanha a estabilidade do documento detectado e dispara a captura
+  /// automática quando ele fica parado por [_autoStableFrames] frames.
+  void _evaluateAutoCapture(List<Offset>? corners) {
+    if (corners == null) {
+      _prevCorners = null;
+      if (_stableCount != 0) setState(() => _stableCount = 0);
+      return;
+    }
+    final prev = _prevCorners;
+    _prevCorners = corners;
+    final moved = prev == null ? double.infinity : _maxCornerDelta(prev, corners);
+    // Parado acumula; mexeu recua devagar (não zera), tolerando tremidos.
+    final next = moved < _autoStableThreshold
+        ? _stableCount + 1
+        : math.max(0, _stableCount - 1);
+    if (next != _stableCount) setState(() => _stableCount = next);
+
+    if (next >= _autoStableFrames) {
+      _stableCount = 0;
+      _prevCorners = null;
+      // Clique discreto do sistema para sinalizar o disparo automático.
+      SystemSound.play(SystemSoundType.click);
+      _capture();
+    }
+  }
+
+  /// Maior deslocamento entre cantos correspondentes (espaço normalizado).
+  double _maxCornerDelta(List<Offset> a, List<Offset> b) {
+    var max = 0.0;
+    final n = math.min(a.length, b.length);
+    for (var i = 0; i < n; i++) {
+      max = math.max(max, (a[i] - b[i]).distance);
+    }
+    return max;
   }
 
   Future<void> _capture() async {
     final controller = _controller;
     if (controller == null || _capturing) return;
+    final l = AppLocalizations.of(context);
+    _stableCount = 0;
+    _prevCorners = null;
     setState(() => _capturing = true);
 
     try {
@@ -115,7 +192,10 @@ class _CameraScreenState extends State<CameraScreen>
       // Detecta o papel na foto em alta resolução.
       List<Offset> corners = DocumentDetector.fullImageCorners();
       if (widget.settings.autoDetect) {
-        corners = await DocumentDetector.detectFromFile(photo.path);
+        corners = await DocumentDetector.detectFromFile(
+          photo.path,
+          sensitivity: widget.settings.detectionSensitivity,
+        );
       }
       if (!mounted) return;
 
@@ -125,7 +205,7 @@ class _CameraScreenState extends State<CameraScreen>
         filter: widget.settings.defaultFilter,
       );
 
-      // Confirmação/ajuste do recorte.
+      // Confirmação/ajuste do recorte (com a detecção já aplicada).
       final confirmed = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (_) => CropScreen(page: page)),
       );
@@ -134,10 +214,23 @@ class _CameraScreenState extends State<CameraScreen>
       page.processedPath = await ImageProcessor.process(page);
       page.version++;
       widget.session.addPage(page);
+
+      // Por padrão, após confirmar vai para a revisão do documento.
+      // A captura contínua (permanecer na câmera) é opcional.
+      if (mounted && widget.settings.reviewAfterEachPage) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => ReviewScreen(
+              session: widget.session,
+              settings: widget.settings,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao capturar: $e')),
+          SnackBar(content: Text(l.captureError('$e'))),
         );
       }
     } finally {
@@ -167,16 +260,17 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   Widget build(BuildContext context) {
     final controller = _controller;
+    final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Escanear'),
+        title: Text(l.scan),
         actions: [
           IconButton(
             icon: Icon(_flashOn ? Icons.flash_on : Icons.flash_off),
-            tooltip: 'Lanterna',
+            tooltip: l.flashlight,
             onPressed: _toggleFlash,
           ),
         ],
@@ -186,7 +280,7 @@ class _CameraScreenState extends State<CameraScreen>
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'Não foi possível abrir a câmera.\n$_error',
+                  l.cameraError(_error!),
                   style: const TextStyle(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
@@ -210,18 +304,60 @@ class _CameraScreenState extends State<CameraScreen>
                                   color: Colors.greenAccent,
                                 ),
                               ),
+                              if (widget.settings.autoCapture &&
+                                  _liveCorners != null &&
+                                  _stableCount > 0 &&
+                                  !_capturing)
+                                Positioned(
+                                  top: 16,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(child: _autoCaptureHint(l)),
+                                ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    _buildControls(),
+                    _buildControls(l),
+                    const SizedBox(height: 32),
                   ],
                 ),
     );
   }
 
-  Widget _buildControls() {
+  Widget _autoCaptureHint(AppLocalizations l) {
+    final progress = (_stableCount / _autoStableFrames).clamp(0.0, 1.0);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 2,
+              color: Colors.greenAccent,
+              backgroundColor: Colors.white24,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            l.autoCaptureHint,
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControls(AppLocalizations l) {
     return Container(
       color: Colors.black,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
@@ -237,7 +373,7 @@ class _CameraScreenState extends State<CameraScreen>
                     ? TextButton(
                         onPressed: _finish,
                         child: Text(
-                          'Concluir\n($count pág.)',
+                          l.finishWithCount(count),
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white),
                         ),

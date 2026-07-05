@@ -1,0 +1,148 @@
+{
+  "@@locale": "en",
+  "appTitle": "Simple Scan PDF",
+  "homeTagline": "Scan documents and create PDFs\nwith searchable text",
+  "homeSubtitle": "Everything is processed on your device.\nNo account, no cloud, no ads.",
+  "scan": "Scan",
+  "openDocument": "Open document",
+  "openDocError": "Could not open the document.\n{error}",
+  "@openDocError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "emptyDocument": "This document has no readable text.",
+  "pdfPageOf": "Page {current} of {total}",
+  "@pdfPageOf": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "settings": "Settings",
+  "continueDocument": "Continue document ({count} pg.)",
+  "@continueDocument": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "flashlight": "Flashlight",
+  "cameraError": "Could not open the camera.\n{error}",
+  "@cameraError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "captureError": "Capture error: {error}",
+  "@captureError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "finishWithCount": "Finish\n({count} pg.)",
+  "@finishWithCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "adjustCrop": "Adjust crop",
+  "detect": "Detect",
+  "all": "All",
+  "use": "Use",
+  "reviewDocument": "Review document",
+  "addPage": "Add page",
+  "discardAll": "Discard all",
+  "noPagesCaptured": "No pages captured.",
+  "pageNumber": "Page {number}",
+  "@pageNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "filterWithName": "Filter: {name}",
+  "@filterWithName": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "addFromCamera": "Take a photo",
+  "addFromGallery": "Choose from gallery",
+  "addPhoto": "Add photo",
+  "editPage": "Edit page",
+  "removePage": "Remove page",
+  "exportPdf": "Export PDF",
+  "discardTitle": "Discard document?",
+  "discardMessage": "All captured pages will be removed.",
+  "cancel": "Cancel",
+  "discard": "Discard",
+  "rotate": "Rotate",
+  "processError": "Processing error: {error}",
+  "@processError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "preparing": "Preparing…",
+  "ocrProgress": "OCR of page {current} of {total}…",
+  "@ocrProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "generatingPdf": "Generating PDF…",
+  "exportError": "Export error: {error}",
+  "@exportError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "pdfGenerated": "PDF created: {name}.pdf",
+  "@pdfGenerated": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "share": "Share",
+  "viewOcrText": "View recognized text (OCR)",
+  "fileName": "File name",
+  "quality": "Quality",
+  "ocrSwitchTitle": "OCR (searchable text)",
+  "ocrSwitchSubtitle": "Local, on-device recognition",
+  "generatePdf": "Generate PDF",
+  "recognizedText": "Recognized text",
+  "copyAll": "Copy all",
+  "textCopied": "Text copied",
+  "autoDetectTitle": "Automatic document detection",
+  "autoDetectSubtitle": "Suggests the crop automatically; manual adjustment stays available",
+  "detectionSensitivity": "Detection sensitivity",
+  "sensitivityConservative": "Conservative",
+  "sensitivityBalanced": "Balanced",
+  "sensitivitySensitive": "Sensitive",
+  "autoCaptureTitle": "Auto capture",
+  "autoCaptureSubtitle": "Takes the photo automatically when the document is steady (needs automatic detection)",
+  "autoCaptureHint": "Hold steady…",
+  "ocrOnExportTitle": "OCR on export",
+  "ocrOnExportSubtitle": "Local text recognition for a searchable PDF",
+  "reviewAfterCaptureTitle": "Review after each page",
+  "reviewAfterCaptureSubtitle": "After confirming, go to the document review. When off, stay on the camera to capture several pages in a row.",
+  "defaultFilter": "Default filter",
+  "defaultPdfQuality": "Default PDF quality",
+  "language": "Language",
+  "languageSystem": "System default",
+  "privacy": "Privacy",
+  "privacyDetail": "All processing (detection, filters, OCR and PDF) happens on your device. Nothing is sent to the internet.",
+  "moreApps": "More apps",
+  "moreAppsSubtitle": "Discover other apps by the same developer",
+  "contactDev": "Contact the developer",
+  "contactDevSubtitle": "Questions, suggestions or issues? Drop me a line",
+  "couldNotOpenLink": "Could not open the link",
+  "filterOriginal": "Original",
+  "filterDocument": "Document",
+  "filterGrayscale": "Grayscale",
+  "filterBlackWhite": "B&W",
+  "filterHighContrast": "Contrast",
+  "qualityEconomy": "Economy",
+  "qualityBalanced": "Balanced",
+  "qualityHigh": "High"
+}

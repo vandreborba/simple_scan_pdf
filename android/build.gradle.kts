@@ -2,6 +2,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Necessário para a lib nativa usada pelo flutter_pdfview.
+        maven { url = uri("https://www.jitpack.io") }
     }
 }
 
