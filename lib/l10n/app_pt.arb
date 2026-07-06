@@ -70,6 +70,8 @@
   "languageSystem": "Padrão do sistema",
   "privacy": "Privacidade",
   "privacyDetail": "Todo o processamento (detecção, filtros, OCR e PDF) acontece no seu aparelho. Nada é enviado para a internet.",
+  "sourceCode": "Código-fonte",
+  "sourceCodeSubtitle": "Veja o projeto open source no GitHub",
   "moreApps": "Mais apps",
   "moreAppsSubtitle": "Conheça outros apps do mesmo desenvolvedor",
   "contactDev": "Contato com o desenvolvedor",

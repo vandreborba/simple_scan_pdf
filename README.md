@@ -1,11 +1,15 @@
 # Simple Scan PDF
 
+[![Licença: GPL v3](https://img.shields.io/badge/Licença-GPLv3-blue.svg)](LICENSE)
+
 Scanner de documentos simples, sem propaganda e sem conta: câmera, detecção
 automática do papel, ajuste manual, filtros, OCR local e exportação em PDF
 pesquisável para compartilhar por WhatsApp, Google Drive, e-mail etc.
 
 Todo o processamento (detecção, filtros, OCR e PDF) acontece no aparelho.
-Nada é enviado para a internet.
+Nada é enviado para a internet — sem telemetria, sem analytics, sem nuvem.
+
+Repositório: <https://github.com/vandreborba/simple_scan_pdf>
 
 ## Recursos
 
@@ -71,3 +75,16 @@ lib/
     quad_painter.dart          # contorno detectado no preview
     corner_editor.dart         # cantos arrastáveis
 ```
+
+## Licença
+
+Copyright © 2025 Vandre Apps
+
+Este projeto é software livre sob a [GNU General Public License v3.0](LICENSE).
+O código-fonte é aberto para que a promessa de privacidade seja verificável:
+tudo roda no aparelho e nenhum dado do usuário é enviado para servidores nossos.
+
+## Contribuindo
+
+Veja [CONTRIBUTING.md](CONTRIBUTING.md) para instruções de build, testes e envio
+de pull requests.

@@ -250,6 +250,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'All processing (detection, filters, OCR and PDF) happens on your device. Nothing is sent to the internet.';
 
   @override
+  String get sourceCode => 'Source code';
+
+  @override
+  String get sourceCodeSubtitle => 'View the open source project on GitHub';
+
+  @override
   String get moreApps => 'More apps';
 
   @override

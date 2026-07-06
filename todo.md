@@ -10,13 +10,15 @@ promessa e passa a ser verificável. A GPLv3 (copyleft) foi escolhida para evita
 que alguém feche o código e venda um clone proprietário.
 
 ### Checklist antes de tornar o repositório público
-- [ ] Garantir que a keystore de assinatura NÃO está versionada
+- [x] Garantir que a keystore de assinatura NÃO está versionada
       (`*.jks` / `*.keystore` / `key.properties` no `.gitignore`).
-- [ ] Adicionar arquivo `LICENSE` com o texto da GPLv3.
-- [ ] Adicionar cabeçalho/menção da licença GPLv3 (ex.: no `README.md`).
-- [ ] Melhorar o `README.md`: o que é o app, screenshots, como buildar/rodar.
-- [ ] Incluir nota de privacidade no README ("100% offline, sem telemetria").
-- [ ] Revisar o histórico do git para garantir que nenhum segredo foi commitado.
+- [x] Adicionar arquivo `LICENSE` com o texto da GPLv3.
+- [x] Adicionar cabeçalho/menção da licença GPLv3 (ex.: no `README.md`).
+- [x] Melhorar o `README.md`: o que é o app, screenshots, como buildar/rodar.
+- [x] Incluir nota de privacidade no README ("100% offline, sem telemetria").
+- [x] Revisar o histórico do git para garantir que nenhum segredo foi commitado.
+- [x] Link para o repositório nas configurações do app.
+- [ ] Tornar o repositório público no GitHub (quando estiver pronto).
 
 ## Doação / apoio ("pague um café") — só se houver bastante usuários
 

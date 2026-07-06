@@ -250,6 +250,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Todo o processamento (detecção, filtros, OCR e PDF) acontece no seu aparelho. Nada é enviado para a internet.';
 
   @override
+  String get sourceCode => 'Código-fonte';
+
+  @override
+  String get sourceCodeSubtitle => 'Veja o projeto open source no GitHub';
+
+  @override
   String get moreApps => 'Mais apps';
 
   @override
