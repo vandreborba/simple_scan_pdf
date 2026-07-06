@@ -1,5 +1,7 @@
 name: simple_scan_pdf
 description: "Scanner de documentos offline: câmera, recorte automático, filtros, OCR local e exportação em PDF pesquisável. Sem conta, sem nuvem, sem anúncios."
+homepage: https://github.com/vandreborba/simple_scan_pdf
+repository: https://github.com/vandreborba/simple_scan_pdf
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

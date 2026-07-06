@@ -132,6 +132,8 @@
   "languageSystem": "System default",
   "privacy": "Privacy",
   "privacyDetail": "All processing (detection, filters, OCR and PDF) happens on your device. Nothing is sent to the internet.",
+  "sourceCode": "Source code",
+  "sourceCodeSubtitle": "View the open source project on GitHub",
   "moreApps": "More apps",
   "moreAppsSubtitle": "Discover other apps by the same developer",
   "contactDev": "Contact the developer",

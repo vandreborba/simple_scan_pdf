@@ -518,6 +518,18 @@ abstract class AppLocalizations {
   /// **'All processing (detection, filters, OCR and PDF) happens on your device. Nothing is sent to the internet.'**
   String get privacyDetail;
 
+  /// No description provided for @sourceCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get sourceCode;
+
+  /// No description provided for @sourceCodeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View the open source project on GitHub'**
+  String get sourceCodeSubtitle;
+
   /// No description provided for @moreApps.
   ///
   /// In en, this message translates to:

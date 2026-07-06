@@ -39,6 +39,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     query: 'subject=Simple Scan PDF',
   );
 
+  // Repositório público do app (GPLv3). URL fixa, não é texto de UI traduzível.
+  static final Uri _repositorioUri = Uri.parse(
+    'https://github.com/vandreborba/simple_scan_pdf',
+  );
+
   Future<void> _openMoreApps() async {
     final messenger = ScaffoldMessenger.of(context);
     final l = AppLocalizations.of(context);
@@ -54,6 +59,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final l = AppLocalizations.of(context);
     final opened = await _tryLaunch(_contatoDevUri);
+    if (!opened && mounted) {
+      messenger.showSnackBar(SnackBar(content: Text(l.couldNotOpenLink)));
+    }
+  }
+
+  Future<void> _abrirRepositorio() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l = AppLocalizations.of(context);
+    final opened = await _tryLaunch(_repositorioUri);
     if (!opened && mounted) {
       messenger.showSnackBar(SnackBar(content: Text(l.couldNotOpenLink)));
     }
@@ -177,6 +191,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.lock_outline),
             title: Text(l.privacy),
             subtitle: Text(l.privacyDetail),
+          ),
+          ListTile(
+            leading: const Icon(Icons.code),
+            title: Text(l.sourceCode),
+            subtitle: Text(l.sourceCodeSubtitle),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: _abrirRepositorio,
           ),
           ListTile(
             leading: const Icon(Icons.apps),
