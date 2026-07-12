@@ -36,6 +36,7 @@ class _CameraScreenState extends State<CameraScreen>
   List<Offset>? _liveCorners;
   bool _capturing = false;
   bool _flashOn = false;
+  bool _inicializando = false;
   String? _error;
 
   // Suavização (EMA) do contorno ao vivo: menor = mais suave e menos tremido.
@@ -57,23 +58,34 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _controller?.dispose();
+    final controller = _controller;
+    _controller = null;
+    if (controller != null) {
+      // Evita callbacks do stream após dispose do State.
+      final future = controller.value.isStreamingImages
+          ? controller.stopImageStream().whenComplete(controller.dispose)
+          : controller.dispose();
+      future.ignore();
+    }
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_inicializando || _capturing) return;
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) return;
     if (state == AppLifecycleState.inactive) {
-      controller.dispose();
       _controller = null;
+      controller.dispose();
     } else if (state == AppLifecycleState.resumed && _controller == null) {
       _initCamera();
     }
   }
 
   Future<void> _initCamera() async {
+    if (_inicializando) return;
+    _inicializando = true;
     try {
       final cameras = await availableCameras();
       final back = cameras.firstWhere(
@@ -88,7 +100,7 @@ class _CameraScreenState extends State<CameraScreen>
       );
       await controller.initialize();
       if (!mounted) {
-        controller.dispose();
+        await controller.dispose();
         return;
       }
       _controller = controller;
@@ -100,9 +112,11 @@ class _CameraScreenState extends State<CameraScreen>
       }
       setState(() {});
     } on CameraException catch (e) {
-      setState(() => _error = e.description ?? e.code);
+      if (mounted) setState(() => _error = e.description ?? e.code);
     } catch (e) {
-      setState(() => _error = '$e');
+      if (mounted) setState(() => _error = '$e');
+    } finally {
+      _inicializando = false;
     }
   }
 
@@ -186,7 +200,14 @@ class _CameraScreenState extends State<CameraScreen>
     _prevCorners = null;
     setState(() => _capturing = true);
 
+    final estavaEmStream = controller.value.isStreamingImages;
     try {
+      // takePicture + ImageAnalysis juntos no CameraX costuma abandonar
+      // buffers; para o stream antes de capturar.
+      if (estavaEmStream) {
+        await controller.stopImageStream();
+      }
+
       final photo = await controller.takePicture();
 
       // Detecta o papel na foto em alta resolução.
@@ -209,7 +230,10 @@ class _CameraScreenState extends State<CameraScreen>
       final confirmed = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (_) => CropScreen(page: page)),
       );
-      if (confirmed != true) return;
+      if (confirmed != true) {
+        await _retomarStreamSePreciso(controller, estavaEmStream);
+        return;
+      }
 
       page.processedPath = await ImageProcessor.process(page);
       page.version++;
@@ -226,16 +250,31 @@ class _CameraScreenState extends State<CameraScreen>
             ),
           ),
         );
+        return;
       }
+
+      await _retomarStreamSePreciso(controller, estavaEmStream);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l.captureError('$e'))),
         );
+        await _retomarStreamSePreciso(controller, estavaEmStream);
       }
     } finally {
       if (mounted) setState(() => _capturing = false);
     }
+  }
+
+  Future<void> _retomarStreamSePreciso(
+    CameraController controller,
+    bool estavaEmStream,
+  ) async {
+    if (!mounted || _controller != controller) return;
+    if (!estavaEmStream || controller.value.isStreamingImages) return;
+    try {
+      await controller.startImageStream(_onFrame);
+    } catch (_) {}
   }
 
   Future<void> _toggleFlash() async {

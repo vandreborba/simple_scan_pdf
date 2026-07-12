@@ -35,6 +35,7 @@ class LiveDetector {
         final corners = await DocumentDetector.detectFromGray(
           gray,
           sensitivity: sensitivity,
+          rapido: true,
         );
         // Analisou mas não achou: lista vazia (diferente de frame descartado).
         if (corners == null) return const <Offset>[];

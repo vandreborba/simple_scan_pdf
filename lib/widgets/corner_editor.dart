@@ -72,6 +72,9 @@ class _CornerEditorState extends State<CornerEditor> {
                 painter: _EditQuadPainter(
                   corners: widget.corners,
                   activeIndex: _dragIndex,
+                  // Enquanto arrasta, a lupa amplia estes pixels — sem
+                  // escurecer fora do recorte, para o zoom ficar legível.
+                  escurecerFora: _dragIndex == null,
                   color: Theme.of(context).colorScheme.primary,
                   handleRadius: _handleRadius,
                 ),
@@ -162,12 +165,14 @@ class _EditQuadPainter extends CustomPainter {
   _EditQuadPainter({
     required this.corners,
     required this.activeIndex,
+    required this.escurecerFora,
     required this.color,
     required this.handleRadius,
   });
 
   final List<Offset> corners;
   final int? activeIndex;
+  final bool escurecerFora;
   final Color color;
   final double handleRadius;
 
@@ -183,16 +188,18 @@ class _EditQuadPainter extends CustomPainter {
     }
     path.close();
 
-    // Escurece a área fora do recorte.
-    final overlay = Path.combine(
-      PathOperation.difference,
-      Path()..addRect(Offset.zero & size),
-      path,
-    );
-    canvas.drawPath(
-      overlay,
-      Paint()..color = Colors.black.withValues(alpha: 0.45),
-    );
+    // Escurece a área fora do recorte (desligado durante o arraste da lupa).
+    if (escurecerFora) {
+      final overlay = Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Offset.zero & size),
+        path,
+      );
+      canvas.drawPath(
+        overlay,
+        Paint()..color = Colors.black.withValues(alpha: 0.45),
+      );
+    }
 
     canvas.drawPath(
       path,
@@ -233,5 +240,6 @@ class _EditQuadPainter extends CustomPainter {
   @override
   bool shouldRepaint(_EditQuadPainter oldDelegate) =>
       oldDelegate.corners != corners ||
-      oldDelegate.activeIndex != activeIndex;
+      oldDelegate.activeIndex != activeIndex ||
+      oldDelegate.escurecerFora != escurecerFora;
 }
