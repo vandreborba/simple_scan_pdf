@@ -22,6 +22,14 @@ extension DetectionSensitivityL10n on DetectionSensitivity {
       };
 }
 
+/// Rótulos localizados da posição da lupa.
+extension PosicaoLupaL10n on PosicaoLupa {
+  String label(AppLocalizations l) => switch (this) {
+        PosicaoLupa.proximoAoDedo => l.loupeNearFinger,
+        PosicaoLupa.cantoOposto => l.loupeOppositeCorner,
+      };
+}
+
 /// Rótulos localizados das qualidades de PDF.
 extension PdfQualityL10n on PdfQuality {
   String label(AppLocalizations l) => switch (this) {

@@ -186,6 +186,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ),
+          ListTile(
+            title: Text(l.loupePosition),
+            subtitle: Text(settings.posicaoLupa.label(l)),
+            trailing: DropdownButton<PosicaoLupa>(
+              value: settings.posicaoLupa,
+              underline: const SizedBox.shrink(),
+              items: [
+                for (final p in PosicaoLupa.values)
+                  DropdownMenuItem(value: p, child: Text(p.label(l))),
+              ],
+              onChanged: (p) {
+                if (p != null) setState(() => settings.posicaoLupa = p);
+              },
+            ),
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.lock_outline),

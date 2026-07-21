@@ -144,7 +144,12 @@ class HomeScreen extends StatelessWidget {
     }
 
     final confirmed = await navigator.push<bool>(
-      MaterialPageRoute(builder: (_) => CropScreen(page: page)),
+      MaterialPageRoute(
+        builder: (_) => CropScreen(
+          page: page,
+          posicaoLupa: settings.posicaoLupa,
+        ),
+      ),
     );
     if (confirmed != true) return;
 

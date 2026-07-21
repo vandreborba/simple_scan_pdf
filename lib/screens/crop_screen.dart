@@ -11,9 +11,16 @@ import '../widgets/corner_editor.dart';
 /// Ajuste do recorte: mostra a detecção automática, permite arrastar os
 /// quatro cantos e girar a página. Retorna true (pop) ao confirmar.
 class CropScreen extends StatefulWidget {
-  const CropScreen({super.key, required this.page});
+  const CropScreen({
+    super.key,
+    required this.page,
+    this.posicaoLupa = PosicaoLupa.proximoAoDedo,
+  });
 
   final ScanPage page;
+
+  /// Preferência de onde a lupa aparece ao arrastar cantos.
+  final PosicaoLupa posicaoLupa;
 
   @override
   State<CropScreen> createState() => _CropScreenState();
@@ -121,6 +128,7 @@ class _CropScreenState extends State<CropScreen> {
                           corners: widget.page.corners.map(_toDisplay).toList(),
                           onChanged: (corners) => setState(() => widget
                               .page.corners = corners.map(_toOriginal).toList()),
+                          posicaoLupa: widget.posicaoLupa,
                           child: RotatedBox(
                             quarterTurns: _turns,
                             child: Image.file(

@@ -228,7 +228,12 @@ class _CameraScreenState extends State<CameraScreen>
 
       // Confirmação/ajuste do recorte (com a detecção já aplicada).
       final confirmed = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(builder: (_) => CropScreen(page: page)),
+        MaterialPageRoute(
+          builder: (_) => CropScreen(
+            page: page,
+            posicaoLupa: widget.settings.posicaoLupa,
+          ),
+        ),
       );
       if (confirmed != true) {
         await _retomarStreamSePreciso(controller, estavaEmStream);

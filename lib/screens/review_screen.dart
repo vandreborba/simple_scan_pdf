@@ -222,7 +222,12 @@ class ReviewScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     final confirmed = await navigator.push<bool>(
-      MaterialPageRoute(builder: (_) => CropScreen(page: page)),
+      MaterialPageRoute(
+        builder: (_) => CropScreen(
+          page: page,
+          posicaoLupa: settings.posicaoLupa,
+        ),
+      ),
     );
     if (confirmed != true) return;
 
@@ -238,7 +243,11 @@ class ReviewScreen extends StatelessWidget {
   void _editPage(BuildContext context, int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PageEditScreen(session: session, pageIndex: index),
+        builder: (_) => PageEditScreen(
+          session: session,
+          pageIndex: index,
+          posicaoLupa: settings.posicaoLupa,
+        ),
       ),
     );
   }

@@ -494,6 +494,24 @@ abstract class AppLocalizations {
   /// **'Default PDF quality'**
   String get defaultPdfQuality;
 
+  /// No description provided for @loupePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Magnifier position'**
+  String get loupePosition;
+
+  /// No description provided for @loupeNearFinger.
+  ///
+  /// In en, this message translates to:
+  /// **'Near finger'**
+  String get loupeNearFinger;
+
+  /// No description provided for @loupeOppositeCorner.
+  ///
+  /// In en, this message translates to:
+  /// **'Opposite corner'**
+  String get loupeOppositeCorner;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:

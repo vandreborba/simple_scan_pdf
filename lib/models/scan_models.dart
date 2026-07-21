@@ -17,6 +17,16 @@ enum DetectionSensitivity {
   sensitive,
 }
 
+/// Onde a lupa do ajuste de cantos aparece. Os rótulos ficam em
+/// [PosicaoLupaL10n].
+enum PosicaoLupa {
+  /// Flutua perto do dedo (acima, ou abaixo se não couber).
+  proximoAoDedo,
+
+  /// Fica no canto da imagem oposto ao toque.
+  cantoOposto,
+}
+
 /// Uma página capturada dentro do documento em andamento.
 class ScanPage {
   ScanPage({

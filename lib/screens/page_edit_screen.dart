@@ -15,10 +15,12 @@ class PageEditScreen extends StatefulWidget {
     super.key,
     required this.session,
     required this.pageIndex,
+    this.posicaoLupa = PosicaoLupa.proximoAoDedo,
   });
 
   final ScanSession session;
   final int pageIndex;
+  final PosicaoLupa posicaoLupa;
 
   @override
   State<PageEditScreen> createState() => _PageEditScreenState();
@@ -65,7 +67,12 @@ class _PageEditScreenState extends State<PageEditScreen> {
 
   Future<void> _recrop() async {
     final confirmed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => CropScreen(page: page)),
+      MaterialPageRoute(
+        builder: (_) => CropScreen(
+          page: page,
+          posicaoLupa: widget.posicaoLupa,
+        ),
+      ),
     );
     if (confirmed == true) {
       await _reprocess();

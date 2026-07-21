@@ -29,6 +29,17 @@ class AppSettings {
   set detectionSensitivity(DetectionSensitivity s) =>
       _prefs.setString('detectionSensitivity', s.name);
 
+  /// Posição da lupa ao arrastar cantos do recorte.
+  PosicaoLupa get posicaoLupa {
+    final name = _prefs.getString('posicaoLupa');
+    return PosicaoLupa.values.firstWhere(
+      (p) => p.name == name,
+      orElse: () => PosicaoLupa.proximoAoDedo,
+    );
+  }
+
+  set posicaoLupa(PosicaoLupa p) => _prefs.setString('posicaoLupa', p.name);
+
   /// Se true, dispara a foto sozinho quando o documento fica estável no
   /// preview. Depende da detecção automática estar ligada.
   bool get autoCapture => _prefs.getBool('autoCapture') ?? true;

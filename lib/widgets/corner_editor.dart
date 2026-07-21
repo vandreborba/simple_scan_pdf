@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/scan_models.dart';
+
 /// Editor de cantos arrastáveis sobre a imagem, para ajuste manual
 /// do recorte. Trabalha com coordenadas normalizadas (0..1).
 class CornerEditor extends StatefulWidget {
@@ -8,6 +10,7 @@ class CornerEditor extends StatefulWidget {
     required this.corners,
     required this.onChanged,
     required this.child,
+    this.posicaoLupa = PosicaoLupa.proximoAoDedo,
   });
 
   /// Cantos TL, TR, BR, BL normalizados.
@@ -16,6 +19,9 @@ class CornerEditor extends StatefulWidget {
 
   /// A imagem sendo editada (deve preencher o espaço disponível).
   final Widget child;
+
+  /// Onde a lupa aparece enquanto um canto é arrastado.
+  final PosicaoLupa posicaoLupa;
 
   @override
   State<CornerEditor> createState() => _CornerEditorState();
@@ -93,7 +99,9 @@ class _CornerEditorState extends State<CornerEditor> {
   Widget _buildMagnifier(Size size, int index) {
     const loupeSize = 120.0;
     const loupeRadius = loupeSize / 2;
-    const gap = 20.0;
+    // Espaço generoso entre o dedo e a lupa (modo perto do dedo).
+    const gap = 48.0;
+    const margemCanto = 12.0;
     final color = Theme.of(context).colorScheme.primary;
 
     final focal = Offset(
@@ -101,17 +109,20 @@ class _CornerEditorState extends State<CornerEditor> {
       widget.corners[index].dy * size.height,
     );
 
-    // A lupa flutua acima do ponto; se não couber em cima, vai para baixo.
-    var centerY = focal.dy - gap - loupeRadius;
-    if (centerY - loupeRadius < 0) {
-      centerY = focal.dy + gap + loupeRadius;
-    }
-    final maxX = size.width - loupeRadius;
-    final maxY = size.height - loupeRadius;
-    final center = Offset(
-      maxX > loupeRadius ? focal.dx.clamp(loupeRadius, maxX) : size.width / 2,
-      maxY > loupeRadius ? centerY.clamp(loupeRadius, maxY) : size.height / 2,
-    );
+    final center = switch (widget.posicaoLupa) {
+      PosicaoLupa.cantoOposto => _centroCantoOposto(
+          size,
+          focal,
+          loupeRadius,
+          margemCanto,
+        ),
+      PosicaoLupa.proximoAoDedo => _centroPertoDoDedo(
+          size,
+          focal,
+          loupeRadius,
+          gap,
+        ),
+    };
 
     return Positioned(
       left: center.dx - loupeRadius,
@@ -133,6 +144,45 @@ class _CornerEditorState extends State<CornerEditor> {
           child: CustomPaint(painter: _CrosshairPainter(color)),
         ),
       ),
+    );
+  }
+
+  /// Acima do toque; se não couber, desce para baixo. Mantém a lupa na tela.
+  Offset _centroPertoDoDedo(
+    Size size,
+    Offset focal,
+    double loupeRadius,
+    double gap,
+  ) {
+    var centerY = focal.dy - gap - loupeRadius;
+    if (centerY - loupeRadius < 0) {
+      centerY = focal.dy + gap + loupeRadius;
+    }
+    final maxX = size.width - loupeRadius;
+    final maxY = size.height - loupeRadius;
+    return Offset(
+      maxX > loupeRadius ? focal.dx.clamp(loupeRadius, maxX) : size.width / 2,
+      maxY > loupeRadius ? centerY.clamp(loupeRadius, maxY) : size.height / 2,
+    );
+  }
+
+  /// Canto da imagem no quadrante oposto ao dedo.
+  Offset _centroCantoOposto(
+    Size size,
+    Offset focal,
+    double loupeRadius,
+    double margem,
+  ) {
+    final maxX = size.width - loupeRadius - margem;
+    final maxY = size.height - loupeRadius - margem;
+    final min = loupeRadius + margem;
+    return Offset(
+      maxX > min
+          ? (focal.dx < size.width / 2 ? maxX : min)
+          : size.width / 2,
+      maxY > min
+          ? (focal.dy < size.height / 2 ? maxY : min)
+          : size.height / 2,
     );
   }
 }

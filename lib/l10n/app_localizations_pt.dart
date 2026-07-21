@@ -237,6 +237,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get defaultPdfQuality => 'Qualidade padrão do PDF';
 
   @override
+  String get loupePosition => 'Posição da lupa';
+
+  @override
+  String get loupeNearFinger => 'Perto do dedo';
+
+  @override
+  String get loupeOppositeCorner => 'Canto oposto';
+
+  @override
   String get language => 'Idioma';
 
   @override
