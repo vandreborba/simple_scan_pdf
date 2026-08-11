@@ -27,13 +27,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Faz o app aparecer em "Abrir com" ao tocar num PDF/ODT no aparelho. -->
+            <!-- Faz o app aparecer em "Abrir com" ao tocar num PDF/ODT/Markdown
+                 (ou texto puro) no aparelho. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:mimeType="application/pdf"/>
                 <data android:mimeType="application/vnd.oasis.opendocument.text"/>
+                <data android:mimeType="text/markdown"/>
+                <data android:mimeType="text/x-markdown"/>
+                <data android:mimeType="text/plain"/>
                 <data android:scheme="content"/>
                 <data android:scheme="file"/>
             </intent-filter>

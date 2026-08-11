@@ -49,3 +49,9 @@ app.*.map.json
 *.keystore
 key.properties
 /android/key.properties
+
+# Estado local de sessões/planos do agente (não versionar)
+.kilo/
+
+# Sessões do daemon do compilador Kotlin (geradas por builds)
+android/.kotlin/

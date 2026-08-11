@@ -37,6 +37,8 @@ class MainActivity : FlutterActivity() {
                     arrayOf(
                         "application/pdf",
                         "application/vnd.oasis.opendocument.text",
+                        "text/markdown",
+                        "text/x-markdown",
                     ),
                 )
                 "pickImage" -> openPicker(result, arrayOf("image/*"))
@@ -122,6 +124,8 @@ class MainActivity : FlutterActivity() {
     private fun extensionForMime(mime: String?): String = when (mime) {
         "application/pdf" -> ".pdf"
         "application/vnd.oasis.opendocument.text" -> ".odt"
+        "text/markdown", "text/x-markdown" -> ".md"
+        "text/plain" -> ".txt"
         "image/jpeg" -> ".jpg"
         "image/png" -> ".png"
         "image/webp" -> ".webp"
