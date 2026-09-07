@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../l10n/app_localizations.dart';
 
-/// Leitor simples de PDF: abre um arquivo local, permite navegar pelas
-/// páginas e exportar (compartilhar/fazer cópia) o documento.
+/// Leitor simples de PDF: abre um arquivo local, exibe as páginas em rolagem
+/// contínua (empilhadas num único canvas, sem pular de página ao rolar) com
+/// zoom nítido no rodapé e permite exportar (compartilhar/fazer cópia) o
+/// documento.
 class PdfReaderScreen extends StatefulWidget {
   const PdfReaderScreen({super.key, required this.path});
 
@@ -16,14 +18,43 @@ class PdfReaderScreen extends StatefulWidget {
 }
 
 class _PdfReaderScreenState extends State<PdfReaderScreen> {
-  bool _ready = false;
+  PdfDocument? _document;
+  PdfControllerPinch? _controller;
   String? _error;
-  int _currentPage = 0;
+  int _currentPage = 1;
   int _totalPages = 0;
 
   String get _fileName {
     final segment = widget.path.split('/').last;
     return segment.isEmpty ? 'PDF' : segment;
+  }
+
+  Future<void> _loadDocument() async {
+    try {
+      final document = await PdfDocument.openFile(widget.path);
+      if (!mounted) return;
+      setState(() {
+        _document = document;
+        _totalPages = document.pagesCount;
+        _controller = PdfControllerPinch(document: Future.value(document));
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = '$e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDocument();
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    _document?.close();
+    super.dispose();
   }
 
   Future<void> _share() async {
@@ -56,40 +87,32 @@ class _PdfReaderScreenState extends State<PdfReaderScreen> {
                 ),
               ),
             )
-          : Stack(
-              children: [
-                PDFView(
-                  filePath: widget.path,
-                  fitPolicy: FitPolicy.WIDTH,
-                  onRender: (pages) => setState(() {
-                    _ready = true;
-                    _totalPages = pages ?? 0;
-                  }),
-                  onError: (error) => setState(() => _error = '$error'),
-                  onPageError: (page, error) =>
-                      setState(() => _error = '$error'),
-                  onPageChanged: (page, total) => setState(() {
-                    _currentPage = page ?? 0;
-                    _totalPages = total ?? _totalPages;
-                  }),
+          : _controller == null
+              ? const Center(child: CircularProgressIndicator())
+              : PdfViewPinch(
+                  controller: _controller!,
+                  onPageChanged: (page) => setState(() => _currentPage = page),
+                  builders: PdfViewPinchBuilders<DefaultBuilderOptions>(
+                    options: const DefaultBuilderOptions(),
+                    documentLoaderBuilder: (_) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
                 ),
-                if (!_ready)
-                  const Center(child: CircularProgressIndicator()),
-              ],
-            ),
-      bottomNavigationBar: (_ready && _error == null && _totalPages > 0)
-          ? SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  l.pdfPageOf(_currentPage + 1, _totalPages),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            )
-          : null,
+      bottomNavigationBar:
+          (_controller != null && _error == null && _totalPages > 0)
+              ? SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      l.pdfPageOf(_currentPage, _totalPages),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                )
+              : null,
     );
   }
 }

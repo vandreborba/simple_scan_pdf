@@ -62,6 +62,26 @@ Baixe agora e tenha um scanner de bolso que respeita a sua privacidade.
 
 ---
 
+## Notas da versão (Play Console)
+
+> Campo "Notas da versão" no Google Play Console, preenchido a cada release.
+> Limite da Play: 500 caracteres por idioma. Mantenha a versão mais recente no
+> topo; as notas antigas podem ser apagadas.
+
+**pt-BR (atual):**
+
+```
+Novo: abra e leia arquivos Markdown (.md) e de texto (.txt) direto no Simple Scan PDF. Toque num arquivo no celular e escolha "Abrir com" — o app renderiza títulos, listas, tabelas, código e links usando o tema do aparelho. O texto pode ser selecionado e copiado, e o arquivo original é compartilhado pela folha do sistema. Tudo offline, sem anúncios e sem conta.
+```
+
+**en-US (current):**
+
+```
+New: open and read Markdown (.md) and plain text (.txt) files right in Simple Scan PDF. Tap a file on your phone and choose "Open with" — the app renders headings, lists, tables, code and links using your device theme. Text is selectable and copyable, and the original file can be shared through the system share sheet. All offline, no ads and no account.
+```
+
+---
+
 ## en-US (English)
 
 **Title:** Simple Scan PDF
