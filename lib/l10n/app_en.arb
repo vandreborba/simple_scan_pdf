@@ -19,6 +19,37 @@
       "total": { "type": "int" }
     }
   },
+  "pdfSearch": "Search",
+  "pdfSearchHint": "Search in the document",
+  "pdfMoreOptions": "More options",
+  "pdfResultsCount": "{current} of {total}",
+  "@pdfResultsCount": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "pdfNoResults": "No results",
+  "pdfExitSearch": "Close search",
+  "pdfPreviousResult": "Previous result",
+  "pdfNextResult": "Next result",
+  "pdfGoToPageTitle": "Go to page",
+  "pdfGoToPageHint": "Enter a page number",
+  "pdfGoToPageConfirm": "Go",
+  "pdfPreviousPage": "Previous page",
+  "pdfNextPage": "Next page",
+  "pdfZoomIn": "Zoom in",
+  "pdfZoomOut": "Zoom out",
+  "pdfFitWidth": "Fit to width",
+  "pdfOutline": "Table of contents",
+  "pdfOutlineEmpty": "This document has no table of contents",
+  "pdfReadMode": "Reading mode",
+  "pdfModeOriginal": "Original",
+  "pdfModeSepia": "Sepia",
+  "pdfModeNight": "Night",
+  "pdfPasswordTitle": "Protected document",
+  "pdfPasswordMessage": "Enter the password to open this document.",
+  "pdfPasswordOk": "Open",
   "settings": "Settings",
   "continueDocument": "Continue document ({count} pg.)",
   "@continueDocument": {

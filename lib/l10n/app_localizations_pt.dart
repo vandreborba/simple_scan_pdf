@@ -39,6 +39,83 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get pdfSearch => 'Buscar';
+
+  @override
+  String get pdfSearchHint => 'Buscar no documento';
+
+  @override
+  String get pdfMoreOptions => 'Mais opções';
+
+  @override
+  String pdfResultsCount(int current, int total) {
+    return '$current de $total';
+  }
+
+  @override
+  String get pdfNoResults => 'Nenhum resultado';
+
+  @override
+  String get pdfExitSearch => 'Fechar busca';
+
+  @override
+  String get pdfPreviousResult => 'Resultado anterior';
+
+  @override
+  String get pdfNextResult => 'Próximo resultado';
+
+  @override
+  String get pdfGoToPageTitle => 'Ir para a página';
+
+  @override
+  String get pdfGoToPageHint => 'Digite um número de página';
+
+  @override
+  String get pdfGoToPageConfirm => 'Ir';
+
+  @override
+  String get pdfPreviousPage => 'Página anterior';
+
+  @override
+  String get pdfNextPage => 'Próxima página';
+
+  @override
+  String get pdfZoomIn => 'Aumentar zoom';
+
+  @override
+  String get pdfZoomOut => 'Diminuir zoom';
+
+  @override
+  String get pdfFitWidth => 'Ajustar à largura';
+
+  @override
+  String get pdfOutline => 'Índice';
+
+  @override
+  String get pdfOutlineEmpty => 'Este documento não tem índice';
+
+  @override
+  String get pdfReadMode => 'Modo de leitura';
+
+  @override
+  String get pdfModeOriginal => 'Original';
+
+  @override
+  String get pdfModeSepia => 'Sépia';
+
+  @override
+  String get pdfModeNight => 'Noturno';
+
+  @override
+  String get pdfPasswordTitle => 'Documento protegido';
+
+  @override
+  String get pdfPasswordMessage => 'Digite a senha para abrir este documento.';
+
+  @override
+  String get pdfPasswordOk => 'Abrir';
+
+  @override
   String get settings => 'Configurações';
 
   @override

@@ -146,6 +146,156 @@ abstract class AppLocalizations {
   /// **'Page {current} of {total}'**
   String pdfPageOf(int current, int total);
 
+  /// No description provided for @pdfSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get pdfSearch;
+
+  /// No description provided for @pdfSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in the document'**
+  String get pdfSearchHint;
+
+  /// No description provided for @pdfMoreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get pdfMoreOptions;
+
+  /// No description provided for @pdfResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total}'**
+  String pdfResultsCount(int current, int total);
+
+  /// No description provided for @pdfNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get pdfNoResults;
+
+  /// No description provided for @pdfExitSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Close search'**
+  String get pdfExitSearch;
+
+  /// No description provided for @pdfPreviousResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous result'**
+  String get pdfPreviousResult;
+
+  /// No description provided for @pdfNextResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Next result'**
+  String get pdfNextResult;
+
+  /// No description provided for @pdfGoToPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to page'**
+  String get pdfGoToPageTitle;
+
+  /// No description provided for @pdfGoToPageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a page number'**
+  String get pdfGoToPageHint;
+
+  /// No description provided for @pdfGoToPageConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get pdfGoToPageConfirm;
+
+  /// No description provided for @pdfPreviousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get pdfPreviousPage;
+
+  /// No description provided for @pdfNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get pdfNextPage;
+
+  /// No description provided for @pdfZoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get pdfZoomIn;
+
+  /// No description provided for @pdfZoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get pdfZoomOut;
+
+  /// No description provided for @pdfFitWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit to width'**
+  String get pdfFitWidth;
+
+  /// No description provided for @pdfOutline.
+  ///
+  /// In en, this message translates to:
+  /// **'Table of contents'**
+  String get pdfOutline;
+
+  /// No description provided for @pdfOutlineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This document has no table of contents'**
+  String get pdfOutlineEmpty;
+
+  /// No description provided for @pdfReadMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading mode'**
+  String get pdfReadMode;
+
+  /// No description provided for @pdfModeOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get pdfModeOriginal;
+
+  /// No description provided for @pdfModeSepia.
+  ///
+  /// In en, this message translates to:
+  /// **'Sepia'**
+  String get pdfModeSepia;
+
+  /// No description provided for @pdfModeNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get pdfModeNight;
+
+  /// No description provided for @pdfPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected document'**
+  String get pdfPasswordTitle;
+
+  /// No description provided for @pdfPasswordMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the password to open this document.'**
+  String get pdfPasswordMessage;
+
+  /// No description provided for @pdfPasswordOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get pdfPasswordOk;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:

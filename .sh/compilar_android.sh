@@ -34,10 +34,19 @@ print_error() {
     printf "${RED}%s${NC}\n" "$1"
 }
 
-# Verifica se está no diretório "0_arquivos_uteis" e sobe um nível se necessário
-if [[ "$(basename "$PWD")" == "0_arquivos_uteis" ]]; then
-    cd ..
-    print_message "Navegando para o diretório do projeto..."
+# Resolve o diretório do próprio script e navega até a raiz do projeto,
+# para que os caminhos relativos funcionem independentemente do diretório
+# atual de execução (gerenciador de arquivos, terminal, extração, etc.).
+# Funciona tanto quando o script está em ".sh" quanto em "0_arquivos_uteis",
+# pois a raiz do projeto é sempre o diretório pai do diretório do script.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname -- "$SCRIPT_DIR")"
+if [[ -f "$PROJECT_DIR/pubspec.yaml" ]]; then
+    cd "$PROJECT_DIR"
+    print_message "Diretório do projeto: $PROJECT_DIR"
+else
+    print_error "pubspec.yaml não encontrado em $PROJECT_DIR"
+    exit 1
 fi
 
 # Atualiza automaticamente a versão no pubspec.yaml antes de compilar

@@ -39,6 +39,83 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pdfSearch => 'Search';
+
+  @override
+  String get pdfSearchHint => 'Search in the document';
+
+  @override
+  String get pdfMoreOptions => 'More options';
+
+  @override
+  String pdfResultsCount(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get pdfNoResults => 'No results';
+
+  @override
+  String get pdfExitSearch => 'Close search';
+
+  @override
+  String get pdfPreviousResult => 'Previous result';
+
+  @override
+  String get pdfNextResult => 'Next result';
+
+  @override
+  String get pdfGoToPageTitle => 'Go to page';
+
+  @override
+  String get pdfGoToPageHint => 'Enter a page number';
+
+  @override
+  String get pdfGoToPageConfirm => 'Go';
+
+  @override
+  String get pdfPreviousPage => 'Previous page';
+
+  @override
+  String get pdfNextPage => 'Next page';
+
+  @override
+  String get pdfZoomIn => 'Zoom in';
+
+  @override
+  String get pdfZoomOut => 'Zoom out';
+
+  @override
+  String get pdfFitWidth => 'Fit to width';
+
+  @override
+  String get pdfOutline => 'Table of contents';
+
+  @override
+  String get pdfOutlineEmpty => 'This document has no table of contents';
+
+  @override
+  String get pdfReadMode => 'Reading mode';
+
+  @override
+  String get pdfModeOriginal => 'Original';
+
+  @override
+  String get pdfModeSepia => 'Sepia';
+
+  @override
+  String get pdfModeNight => 'Night';
+
+  @override
+  String get pdfPasswordTitle => 'Protected document';
+
+  @override
+  String get pdfPasswordMessage => 'Enter the password to open this document.';
+
+  @override
+  String get pdfPasswordOk => 'Open';
+
+  @override
   String get settings => 'Settings';
 
   @override
